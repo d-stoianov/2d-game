@@ -1,3 +1,4 @@
+import { Game } from "@/game/Game"
 import { createServer } from "http"
 
 const PORT = 8080
@@ -11,3 +12,6 @@ const server = createServer((req, res) => {
 server.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`)
 })
+
+const game = new Game()
+game.start()
