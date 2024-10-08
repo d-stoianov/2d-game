@@ -24,7 +24,7 @@ const io = new SocketIOServer(server, {
 io.on("connection", (socket: Socket) => {
     console.log(`New player connected: ${socket.id}`)
 
-    game.addPlayer(new Player(socket.id, 0, 0, 50, 50))
+    game.addPlayer(socket.id)
 
     socket.on("disconnect", () => {
         game.removePlayer(socket.id)
@@ -32,5 +32,5 @@ io.on("connection", (socket: Socket) => {
     })
 })
 
-const game = new Game()
+const game = new Game(io)
 game.start()

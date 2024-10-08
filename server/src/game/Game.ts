@@ -1,10 +1,12 @@
 import { GameState } from "~/shared/GameState"
 import { Player } from "@/game/Player"
+import { Server as SocketIOServer } from "socket.io"
 
 const FPS: number = 60 // target frames per second
 const MS_PER_FRAME: number = 1000 / FPS // frame duration in milliseconds
 
 export class Game {
+    private io: SocketIOServer
     private gameState: GameState = {
         players: [],
     }
@@ -14,6 +16,10 @@ export class Game {
 
     private lastLogTime: number = 0
 
+    constructor(io: SocketIOServer) {
+        this.io = io
+    }
+
     public start(): void {
         // game loop
         setTimeout(() => {
@@ -21,8 +27,9 @@ export class Game {
         }, MS_PER_FRAME)
     }
 
-    public addPlayer(p: Player): void {
-        this.gameState.players.push(p)
+    public addPlayer(id: string): void {
+        const player = new Player(id, 0, 0, 50, 50)
+        this.gameState.players.push(player)
     }
 
     public removePlayer(id: string): void {
@@ -46,7 +53,9 @@ export class Game {
         }, MS_PER_FRAME)
     }
 
-    private render() {}
+    private render() {
+        this.io.emit("game-state", this.gameState, new Date().getTime())
+    }
 
     private update(dt: number) {}
 
