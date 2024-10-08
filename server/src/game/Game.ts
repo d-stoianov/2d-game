@@ -1,4 +1,4 @@
-import { GameState } from "~/shared/GameState"
+import { GameState } from "@/game/GameState"
 import { Player } from "@/game/Player"
 import { Server as SocketIOServer } from "socket.io"
 
@@ -10,6 +10,8 @@ export class Game {
     private gameState: GameState = {
         players: [],
     }
+
+    private inputMap: Map<string, string[]> = new Map<string, string[]>()
 
     private lastFrameTime: number = 0
     private gameTime: number = 0
@@ -28,7 +30,9 @@ export class Game {
     }
 
     public addPlayer(id: string): void {
-        const player = new Player(id, 0, 0, 50, 50)
+        this.inputMap.set(id, [])
+
+        const player = new Player(id, 0, 0, 50, 50, 250)
         this.gameState.players.push(player)
     }
 
@@ -39,6 +43,10 @@ export class Game {
         }
     }
 
+    public registerPlayerInput(id: string, inputArray: string[]): void {
+        this.inputMap.set(id, inputArray)
+    }
+
     private frame(): void {
         this.gameTime = performance.now()
         const dt = this.gameTime - this.lastFrameTime
@@ -46,7 +54,6 @@ export class Game {
 
         this.update(dt)
         this.render()
-        this.log()
 
         setTimeout(() => {
             this.frame()
@@ -57,13 +64,22 @@ export class Game {
         this.io.emit("game-state", this.gameState, new Date().getTime())
     }
 
-    private update(dt: number) {}
+    private update(dt: number) {
+        // update each player in game state
+        this.gameState.players.forEach((p) => {
+            const inputArray = this.inputMap.get(p.id)
+            if (inputArray) {
+                p.update(dt, inputArray)
+            }
+        })
+    }
 
     private log() {
         const LOG_INTERVAL = 1000
 
         if (this.gameTime - this.lastLogTime >= LOG_INTERVAL) {
             console.log("Game state players: ", this.gameState.players)
+            console.log("Input map: ", this.inputMap)
 
             this.lastLogTime = this.gameTime
         }

@@ -1,5 +1,5 @@
 import { PlayerInterface } from "./Player"
 
-export interface GameState {
+export interface GameStateInterface {
     players: PlayerInterface[]
 }

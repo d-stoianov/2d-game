@@ -1,5 +1,4 @@
 import { Game } from "@/game/Game"
-import { Player } from "@/game/Player"
 import { createServer } from "http"
 import { Server as SocketIOServer, Socket } from "socket.io"
 
@@ -25,6 +24,10 @@ io.on("connection", (socket: Socket) => {
     console.log(`New player connected: ${socket.id}`)
 
     game.addPlayer(socket.id)
+
+    socket.on("input", (inputArray: string[]) => {
+        game.registerPlayerInput(socket.id, inputArray)
+    })
 
     socket.on("disconnect", () => {
         game.removePlayer(socket.id)

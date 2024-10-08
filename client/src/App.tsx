@@ -6,7 +6,6 @@ const App = () => {
     // wait for canvas to be created in html
     useEffect(() => {
         const socket = io(import.meta.env.VITE_API_URL)
-
         socket.on('connect', () => {
             console.log(`You connected with a ${socket.id}`)
         })

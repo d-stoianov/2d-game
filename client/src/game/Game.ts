@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client'
-import { GameState } from '~/shared/GameState'
+import { GameStateInterface as GameState } from '~/shared/GameState'
 
 const WIDTH = 500
 const HEIGHT = 500
@@ -75,17 +75,15 @@ export class Game {
     }
 
     private update() {
-        // if (this.keys['ArrowRight']) {
-        //     this.player.x += PLAYER_SPEED * dtInSeconds
-        // }
-        // if (this.keys['ArrowLeft']) {
-        //     this.player.x -= PLAYER_SPEED * dtInSeconds
-        // }
-        // if (this.keys['ArrowUp']) {
-        //     this.player.y -= PLAYER_SPEED * dtInSeconds
-        // }
-        // if (this.keys['ArrowDown']) {
-        //     this.player.y += PLAYER_SPEED * dtInSeconds
-        // }
+        // pass input array to the backend
+        const inputArray: string[] = []
+
+        Object.keys(this.keys).forEach((key: string) => {
+            if (this.keys[key]) {
+                inputArray.push(key)
+            }
+        })
+
+        this.socket.emit('input', inputArray)
     }
 }
