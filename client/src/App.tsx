@@ -1,11 +1,22 @@
 import { Game } from '@/game/Game'
 import { useEffect } from 'react'
+import { io } from 'socket.io-client'
 
 const App = () => {
     // wait for canvas to be created in html
     useEffect(() => {
         const game = new Game()
         game.start()
+
+        const socket = io(import.meta.env.VITE_API_URL)
+
+        socket.on('connect', () => {
+            console.log(`You connected with a ${socket.id}`)
+        })
+
+        return () => {
+            socket.disconnect()
+        }
     }, [])
 
     return (
