@@ -1,6 +1,7 @@
 import { GameObject } from "@/game/GameObject"
+import { PlayerInterface } from "~/shared/Player"
 
-export class Player extends GameObject {
+export class Player extends GameObject implements PlayerInterface {
     public id: string
 
     constructor(

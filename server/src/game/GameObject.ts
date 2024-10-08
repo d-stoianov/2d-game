@@ -1,4 +1,6 @@
-export class GameObject {
+import { GameObjectInterface } from "~/shared/GameObject"
+
+export class GameObject implements GameObjectInterface {
     public x: number
     public y: number
     public width: number

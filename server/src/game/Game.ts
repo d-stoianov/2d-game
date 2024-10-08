@@ -1,19 +1,18 @@
+import { GameState } from "~/shared/GameState"
 import { Player } from "@/game/Player"
 
 const FPS: number = 60 // target frames per second
 const MS_PER_FRAME: number = 1000 / FPS // frame duration in milliseconds
 
 export class Game {
-    private gameState: GameState
+    private gameState: GameState = {
+        players: [],
+    }
 
     private lastFrameTime: number = 0
     private gameTime: number = 0
 
     private lastLogTime: number = 0
-
-    constructor() {
-        this.gameState = new GameState()
-    }
 
     public start(): void {
         // game loop
@@ -60,8 +59,4 @@ export class Game {
             this.lastLogTime = this.gameTime
         }
     }
-}
-
-class GameState {
-    public players: Player[] = []
 }
