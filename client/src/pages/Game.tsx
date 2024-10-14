@@ -1,19 +1,20 @@
+import { useSocket } from '@/context/SocketContext'
 import { Game } from '@/game/Game'
 import { useEffect } from 'react'
-import { io } from 'socket.io-client'
+import { useParams } from 'react-router-dom'
 
 const GamePage = () => {
+    const socket = useSocket()
+    const { roomId } = useParams()
+
     useEffect(() => {
-        const socket = io(import.meta.env.VITE_API_URL)
-        socket.on('connect', () => {
-            console.log(`You connected with a ${socket.id}`)
-        })
+        if (socket && roomId) {
+            const game = new Game(socket)
+            game.start()
 
-        const game = new Game(socket)
-        game.start()
-
-        return () => {
-            socket.disconnect()
+            return () => {
+                socket.emit('leaveRoom', roomId)
+            }
         }
     }, [])
 

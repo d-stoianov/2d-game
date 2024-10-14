@@ -1,4 +1,6 @@
 import { Game } from "@/game/Game"
+import { RoomService } from "@/RoomService"
+import { UUID } from "crypto"
 import { createServer } from "http"
 import { Server as SocketIOServer, Socket } from "socket.io"
 
@@ -20,20 +22,59 @@ const io = new SocketIOServer(server, {
     },
 })
 
+type User = {
+    socketId: string
+    nickname: string
+}
+
+const roomService = new RoomService()
+
+const socketIdToUser: { [socketId: string]: User } = {}
+
 io.on("connection", (socket: Socket) => {
-    console.log(`New player connected: ${socket.id}`)
+    console.log(`New user connected: ${socket.id}`)
 
-    game.addPlayer(socket.id)
+    socket.on("createRoom", (nickname: string) => {
+        const creator: User = { nickname: nickname, socketId: socket.id }
+        socketIdToUser[socket.id] = creator
+        const roomId = roomService.createRoom(creator)
 
-    socket.on("input", (inputArray: string[]) => {
-        game.registerPlayerInput(socket.id, inputArray)
+        const game = new Game(io)
+        game.start()
+
+        game.addPlayer(socket.id)
+
+        socket.on("input", (inputArray: string[]) => {
+            game.registerPlayerInput(socket.id, inputArray)
+        })
+
+        socket.emit("roomId", roomId)
+    })
+
+    socket.on("joinRoom", (nickname: string, roomId: UUID) => {
+        const user: User = { nickname: nickname, socketId: socket.id }
+        socketIdToUser[socket.id] = user
+        roomService.joinRoom(roomId, user)
+    })
+
+    socket.on("leaveRoom", (roomId: UUID) => {
+        const user = socketIdToUser[socket.id]
+        if (user) {
+            roomService.leaveRoom(roomId, user)
+            delete socketIdToUser[socket.id]
+        }
     })
 
     socket.on("disconnect", () => {
-        game.removePlayer(socket.id)
-        console.log(`Player disconnected: ${socket.id}`)
+        const user = socketIdToUser[socket.id]
+        if (user) {
+            const roomId = roomService.findRoomByUser(socket.id)
+            if (roomId) {
+                roomService.leaveRoom(roomId, user)
+            }
+            delete socketIdToUser[socket.id]
+        }
+
+        console.log(`User disconnected: ${socket.id}`)
     })
 })
-
-const game = new Game(io)
-game.start()

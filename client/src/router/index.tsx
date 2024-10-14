@@ -15,11 +15,11 @@ const router = createBrowserRouter([
         element: <CreatePage />,
     },
     {
-        path: '/join/:sessionId?',
+        path: '/join/:roomId?',
         element: <JoinPage />,
     },
     {
-        path: '/game',
+        path: '/game/:roomId?',
         element: <GamePage />,
     },
 ])
