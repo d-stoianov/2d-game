@@ -1,59 +1,82 @@
+import { Server as SocketIOServer } from "socket.io"
 import { randomUUID, UUID } from "crypto"
 
-type User = {
-    socketId: string
-    nickname: string
-}
+import { Game } from "@/game/Game"
+import { User } from "~/shared/User"
 
 type Rooms = {
-    [roomId: UUID]: User[]
+    [roomId: UUID]: {
+        game: Game
+        users: User[]
+    }
 }
 
 export class RoomService {
     private rooms: Rooms = {}
 
-    public createRoom(creator: User): UUID {
+    private userToRoomMap: Map<string, UUID> = new Map()
+    private roomToGameMap: Map<UUID, Game> = new Map()
+
+    public createRoom(creator: User, io: SocketIOServer): UUID {
         const roomId = randomUUID()
+        const game = new Game(io, roomId)
 
-        this.rooms[roomId] = []
-        this.rooms[roomId].push(creator)
+        this.rooms[roomId] = {
+            game,
+            users: [creator],
+        }
 
-        console.log(
-            `New room created: ${roomId} by user: ${JSON.stringify(creator)}`
-        )
+        this.userToRoomMap.set(creator.socketId, roomId)
+        this.roomToGameMap.set(roomId, game)
+
+        game.start()
+        game.addPlayer(creator.socketId)
 
         return roomId
     }
 
-    public joinRoom(roomId: UUID, user: User) {
-        if (this.rooms[roomId]) {
-            this.rooms[roomId].push(user)
-            console.log(
-                `User: ${JSON.stringify(user)} joined the room: ${roomId}`
-            )
+    public joinRoom(roomId: UUID, user: User): void {
+        const room = this.rooms[roomId]
+        if (room) {
+            room.users.push(user)
+            this.userToRoomMap.set(user.socketId, roomId)
+            room.game.addPlayer(user.socketId)
         }
     }
 
-    public leaveRoom(roomId: UUID, user: User) {
-        const userIndex = this.rooms[roomId].indexOf(user)
-        this.rooms[roomId].splice(userIndex, 1)
+    public leaveRoom(roomId: UUID, user: User): void {
+        const room = this.rooms[roomId]
+        if (room) {
+            room.users = room.users.filter((u) => u.socketId !== user.socketId)
+            this.userToRoomMap.delete(user.socketId)
 
-        console.log(`User: ${JSON.stringify(user)} left the room: ${roomId}`)
+            room.game.removePlayer(user.socketId)
 
-        console.log("THIS ROOMS:", JSON.stringify(this.rooms))
-
-        // delete room if its empty
-        if (this.rooms[roomId].length === 0) {
-            console.log(`Room: ${roomId} was cleared, because it's empty`)
-            delete this.rooms[roomId]
+            // delete room if its empty
+            if (room.users.length === 0) {
+                this.deleteRoom(roomId)
+            }
         }
+    }
+
+    private deleteRoom(roomId: UUID): void {
+        delete this.rooms[roomId]
+        this.roomToGameMap.delete(roomId)
+    }
+
+    public findGameByRoom(roomId: UUID): Game | null {
+        return this.roomToGameMap.get(roomId) || null
     }
 
     public findRoomByUser(socketId: string): UUID | null {
-        for (const [roomId, users] of Object.entries(this.rooms)) {
-            if (users.some((user) => user.socketId === socketId)) {
-                return roomId as UUID
-            }
+        return this.userToRoomMap.get(socketId) || null
+    }
+
+    public findUserBySocketId(socketId: string): User | null {
+        const roomId = this.userToRoomMap.get(socketId)
+        if (roomId) {
+            const room = this.rooms[roomId]
+            return room?.users.find((u) => u.socketId === socketId) || null
         }
         return null
     }

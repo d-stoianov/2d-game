@@ -1,8 +1,8 @@
-import { Game } from "@/game/Game"
 import { RoomService } from "@/RoomService"
 import { UUID } from "crypto"
 import { createServer } from "http"
 import { Server as SocketIOServer, Socket } from "socket.io"
+import { User } from "~/shared/User"
 
 const PORT = 8080
 
@@ -22,59 +22,65 @@ const io = new SocketIOServer(server, {
     },
 })
 
-type User = {
-    socketId: string
-    nickname: string
-}
-
 const roomService = new RoomService()
-
-const socketIdToUser: { [socketId: string]: User } = {}
 
 io.on("connection", (socket: Socket) => {
     console.log(`New user connected: ${socket.id}`)
 
     socket.on("createRoom", (nickname: string) => {
-        const creator: User = { nickname: nickname, socketId: socket.id }
-        socketIdToUser[socket.id] = creator
-        const roomId = roomService.createRoom(creator)
+        const creator: User = { nickname, socketId: socket.id }
+        const roomId = roomService.createRoom(creator, io)
 
-        const game = new Game(io)
-        game.start()
-
-        game.addPlayer(socket.id)
-
-        socket.on("input", (inputArray: string[]) => {
-            game.registerPlayerInput(socket.id, inputArray)
-        })
-
+        socket.join(roomId)
         socket.emit("roomId", roomId)
+
+        console.log(`User ${nickname} created room ${roomId}`)
     })
 
     socket.on("joinRoom", (nickname: string, roomId: UUID) => {
-        const user: User = { nickname: nickname, socketId: socket.id }
-        socketIdToUser[socket.id] = user
-        roomService.joinRoom(roomId, user)
+        const user: User = { nickname, socketId: socket.id }
+        const game = roomService.findGameByRoom(roomId)
+
+        if (game) {
+            roomService.joinRoom(roomId, user)
+            socket.join(roomId)
+
+            console.log(`User ${nickname} joined room ${roomId}`)
+        }
+    })
+
+    socket.on("input", (inputArray: string[]) => {
+        const roomId = roomService.findRoomByUser(socket.id)
+
+        if (roomId) {
+            const game = roomService.findGameByRoom(roomId)
+
+            if (game) {
+                game.registerPlayerInput(socket.id, inputArray)
+            }
+        }
     })
 
     socket.on("leaveRoom", (roomId: UUID) => {
-        const user = socketIdToUser[socket.id]
+        const user = roomService.findUserBySocketId(socket.id)
+
         if (user) {
             roomService.leaveRoom(roomId, user)
-            delete socketIdToUser[socket.id]
+            socket.leave(roomId)
+
+            console.log(`User ${user.nickname} left room ${roomId}`)
         }
     })
 
     socket.on("disconnect", () => {
-        const user = socketIdToUser[socket.id]
-        if (user) {
-            const roomId = roomService.findRoomByUser(socket.id)
-            if (roomId) {
-                roomService.leaveRoom(roomId, user)
-            }
-            delete socketIdToUser[socket.id]
-        }
+        const roomId = roomService.findRoomByUser(socket.id)
+        const user = roomService.findUserBySocketId(socket.id)
 
-        console.log(`User disconnected: ${socket.id}`)
+        if (roomId && user) {
+            roomService.leaveRoom(roomId, user)
+            socket.leave(roomId)
+
+            console.log(`User ${user.nickname} disconnected`)
+        }
     })
 })

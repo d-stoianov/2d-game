@@ -1,5 +1,6 @@
 import { GameState } from "@/game/GameState"
 import { Player } from "@/game/Player"
+import { UUID } from "crypto"
 import { Server as SocketIOServer } from "socket.io"
 
 const FPS: number = 60 // target frames per second
@@ -7,6 +8,7 @@ const MS_PER_FRAME: number = 1000 / FPS // frame duration in milliseconds
 
 export class Game {
     private io: SocketIOServer
+    private roomId: UUID
     private gameState: GameState = {
         players: [],
     }
@@ -18,8 +20,9 @@ export class Game {
 
     private lastLogTime: number = 0
 
-    constructor(io: SocketIOServer) {
+    constructor(io: SocketIOServer, roomId: UUID) {
         this.io = io
+        this.roomId = roomId
     }
 
     public start(): void {
@@ -61,7 +64,9 @@ export class Game {
     }
 
     private render() {
-        this.io.emit("game-state", this.gameState, new Date().getTime())
+        this.io
+            .to(this.roomId)
+            .emit("game-state", this.gameState, new Date().getTime())
     }
 
     private update(dt: number) {
