@@ -46,6 +46,10 @@ io.on("connection", (socket: Socket) => {
             socket.join(roomId)
 
             console.log(`User ${nickname} joined room ${roomId}`)
+            socket.emit("roomExists", true)
+        } else {
+            socket.emit("roomExists", false)
+            console.log(`No room found by id ${roomId}`)
         }
     })
 

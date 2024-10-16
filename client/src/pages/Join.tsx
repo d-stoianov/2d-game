@@ -11,6 +11,8 @@ const JoinPage = () => {
     const [nickname, setNickname] = useState<string>('')
     const [roomId, setRoomId] = useState<string>(roomIdFromParams ?? '')
 
+    const [errorMsg, setErrorMsg] = useState<string>('')
+
     const isButtonDisabled = nickname.length === 0 || roomId.length === 0
 
     const onJoin = () => {
@@ -18,10 +20,16 @@ const JoinPage = () => {
             // do validation
             socket.emit('joinRoom', nickname, roomId)
 
-            setIsAuthorized(true)
-            setUserNickname(nickname)
+            socket.on('roomExists', (value: boolean) => {
+                if (value) {
+                    setIsAuthorized(true)
+                    setUserNickname(nickname)
 
-            navigate(`/game/${roomId}`)
+                    navigate(`/game/${roomId}`)
+                } else {
+                    setErrorMsg('Room not found')
+                }
+            })
         }
     }
 
@@ -41,6 +49,7 @@ const JoinPage = () => {
                 value={roomId}
                 onChange={(e) => setRoomId(e.target.value)}
             />
+            {errorMsg.length > 0 && <p className="text-red-500">{errorMsg}</p>}
             <button
                 onClick={onJoin}
                 disabled={isButtonDisabled}
