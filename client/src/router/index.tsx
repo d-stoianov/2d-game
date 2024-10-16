@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 
+import ProtectedRoute from '@/router/ProtectedRoute'
 import HomePage from '@/pages'
 import CreatePage from '@/pages/Create'
 import JoinPage from '@/pages/Join'
@@ -20,7 +21,11 @@ const router = createBrowserRouter([
     },
     {
         path: '/game/:roomId?',
-        element: <GamePage />,
+        element: (
+            <ProtectedRoute>
+                <GamePage />
+            </ProtectedRoute>
+        ),
     },
 ])
 

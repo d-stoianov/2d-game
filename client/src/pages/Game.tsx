@@ -1,11 +1,13 @@
-import { useSocket } from '@/context/SocketContext'
+import { useUser } from '@/context/UserContext'
 import { Game } from '@/game/Game'
 import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 
 const GamePage = () => {
-    const socket = useSocket()
+    const user = useUser()
     const { roomId } = useParams()
+
+    const { socket, setIsAuthorized, setNickname } = user
 
     useEffect(() => {
         if (socket && roomId) {
@@ -13,6 +15,8 @@ const GamePage = () => {
             game.start()
 
             return () => {
+                setIsAuthorized(false)
+                setNickname('')
                 socket.emit('leaveRoom', roomId)
             }
         }

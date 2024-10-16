@@ -1,12 +1,12 @@
-import { SocketProvider } from '@/context/SocketContext'
+import { UserProvider } from '@/context/UserContext'
 import router from '@/router'
 import { RouterProvider } from 'react-router-dom'
 
 const App = () => {
     return (
-        <SocketProvider>
+        <UserProvider>
             <RouterProvider router={router} />
-        </SocketProvider>
+        </UserProvider>
     )
 }
 

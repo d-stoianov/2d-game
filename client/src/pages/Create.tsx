@@ -1,10 +1,10 @@
-import { useSocket } from '@/context/SocketContext'
+import { useUser } from '@/context/UserContext'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const CreatePage = () => {
     const navigate = useNavigate()
-    const socket = useSocket()
+    const { socket, setIsAuthorized, setNickname: setUserNickname } = useUser()
 
     const [nickname, setNickname] = useState<string>('')
 
@@ -12,8 +12,13 @@ const CreatePage = () => {
 
     const onCreate = () => {
         if (socket) {
+            // do some validation
+
             socket.emit('createRoom', nickname)
             socket.on('roomId', (roomId) => {
+                setIsAuthorized(true)
+                setUserNickname(nickname)
+
                 navigate(`/game/${roomId}`)
             })
         }
