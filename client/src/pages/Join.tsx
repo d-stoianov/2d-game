@@ -1,13 +1,15 @@
 import { useUser } from '@/context/UserContext'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const JoinPage = () => {
     const navigate = useNavigate()
+    const { state: roomIdFromParams } = useLocation()
+
     const { socket, setIsAuthorized, setNickname: setUserNickname } = useUser()
 
     const [nickname, setNickname] = useState<string>('')
-    const [roomId, setRoomId] = useState<string>('')
+    const [roomId, setRoomId] = useState<string>(roomIdFromParams ?? '')
 
     const isButtonDisabled = nickname.length === 0 || roomId.length === 0
 
