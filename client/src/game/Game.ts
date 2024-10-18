@@ -1,6 +1,9 @@
-import { Label } from '@/game/Label'
 import { Socket } from 'socket.io-client'
+
 import { GameStateInterface as GameState } from '~/shared/GameState'
+import { Player } from '@/game/Player'
+import { Label } from '@/game/Label'
+import { PlayerInterface } from '~/shared/Player'
 
 const WIDTH = 500
 const HEIGHT = 500
@@ -70,14 +73,16 @@ export class Game {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
         // draw each player
-        this.gameState.players.forEach((player) => {
+        this.gameState.players.forEach((p: PlayerInterface) => {
             const textYPadding = 5
+
+            const player = Object.assign(new Player(), p)
 
             const label = new Label(
                 this.ctx,
                 player.x,
                 player.y - textYPadding,
-                player.id
+                player.nickname
             )
 
             const textWidth = label.measureText()

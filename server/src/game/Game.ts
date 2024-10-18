@@ -32,10 +32,10 @@ export class Game {
         }, MS_PER_FRAME)
     }
 
-    public addPlayer(id: string): void {
+    public addPlayer(id: string, nickname: string): void {
         this.inputMap.set(id, [])
 
-        const player = new Player(id, 0, 0, 50, 50, 250)
+        const player = new Player(id, 0, 0, 50, 50, 250, nickname)
         this.gameState.players.push(player)
     }
 

@@ -4,6 +4,7 @@ import { PlayerInterface } from "~/shared/Player"
 export class Player extends GameObject implements PlayerInterface {
     public id: string
     public speed: number
+    public nickname: string
 
     constructor(
         id: string = "",
@@ -11,11 +12,13 @@ export class Player extends GameObject implements PlayerInterface {
         y: number = 0,
         width: number = 0,
         height: number = 0,
-        speed: number = 0
+        speed: number = 0,
+        nickanme: string = ""
     ) {
         super(x, y, width, height)
         this.id = id
         this.speed = speed
+        this.nickname = nickanme
     }
 
     public update(dt: number, inputArray: string[]) {

@@ -6,7 +6,7 @@ const JoinPage = () => {
     const navigate = useNavigate()
     const { state: roomIdFromParams } = useLocation()
 
-    const { socket, setIsAuthorized, setNickname: setUserNickname } = useUser()
+    const { socket, setIsAuthorized } = useUser()
 
     const [nickname, setNickname] = useState<string>('')
     const [roomId, setRoomId] = useState<string>(roomIdFromParams ?? '')
@@ -23,8 +23,6 @@ const JoinPage = () => {
             socket.on('roomExists', (value: boolean) => {
                 if (value) {
                     setIsAuthorized(true)
-                    setUserNickname(nickname)
-
                     navigate(`/game/${roomId}`)
                 } else {
                     setErrorMsg('Room not found')
@@ -39,6 +37,7 @@ const JoinPage = () => {
                 className="h-[3rem] w-[16rem] rounded-xl border-2 pl-3"
                 type="text"
                 placeholder="Nickname"
+                maxLength={15}
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
             />

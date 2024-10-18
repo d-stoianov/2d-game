@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 
 const CreatePage = () => {
     const navigate = useNavigate()
-    const { socket, setIsAuthorized, setNickname: setUserNickname } = useUser()
+    const { socket, setIsAuthorized } = useUser()
 
     const [nickname, setNickname] = useState<string>('')
 
@@ -17,8 +17,6 @@ const CreatePage = () => {
             socket.emit('createRoom', nickname)
             socket.on('roomId', (roomId) => {
                 setIsAuthorized(true)
-                setUserNickname(nickname)
-
                 navigate(`/game/${roomId}`)
             })
         }
@@ -30,6 +28,7 @@ const CreatePage = () => {
                 className="h-[3rem] w-[16rem] rounded-xl border-2 pl-3"
                 type="text"
                 placeholder="Nickname"
+                maxLength={15}
                 value={nickname}
                 onChange={(e) => setNickname(e.target.value)}
             />

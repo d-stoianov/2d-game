@@ -2,7 +2,7 @@ import { RoomService } from "@/RoomService"
 import { UUID } from "crypto"
 import { createServer } from "http"
 import { Server as SocketIOServer, Socket } from "socket.io"
-import { User } from "~/shared/User"
+import { User } from "@/game/User"
 
 const PORT = 8080
 

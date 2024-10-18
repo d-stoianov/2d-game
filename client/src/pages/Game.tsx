@@ -7,16 +7,16 @@ const GamePage = () => {
     const user = useUser()
     const { roomId } = useParams()
 
-    const { socket, setIsAuthorized, setNickname } = user
+    const { socket, setIsAuthorized } = user
 
     useEffect(() => {
         if (socket && roomId) {
             const game = new Game(socket)
+
             game.start()
 
             return () => {
                 setIsAuthorized(false)
-                setNickname('')
                 socket.emit('leaveRoom', roomId)
             }
         }

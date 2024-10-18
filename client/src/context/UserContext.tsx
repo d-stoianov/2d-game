@@ -11,22 +11,17 @@ interface UserContextI {
     socket: Socket | null
     isAuthorized: boolean
     setIsAuthorized: (value: boolean) => void
-    nickname: string
-    setNickname: (value: string) => void
 }
 
 export const UserContext = createContext<UserContextI>({
     socket: null,
     isAuthorized: false,
     setIsAuthorized: () => {},
-    nickname: '',
-    setNickname: () => {},
 })
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [socket, setSocket] = useState<Socket | null>(null)
     const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
-    const [nickname, setNickname] = useState<string>('')
 
     useEffect(() => {
         const newSocket = io(import.meta.env.VITE_API_URL)
@@ -48,8 +43,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
                 socket,
                 isAuthorized,
                 setIsAuthorized,
-                nickname,
-                setNickname,
             }}
         >
             {children}

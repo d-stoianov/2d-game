@@ -2,7 +2,7 @@ import { Server as SocketIOServer } from "socket.io"
 import { randomUUID, UUID } from "crypto"
 
 import { Game } from "@/game/Game"
-import { User } from "~/shared/User"
+import { User } from "@/game/User"
 
 type Rooms = {
     [roomId: UUID]: {
@@ -30,7 +30,7 @@ export class RoomService {
         this.roomToGameMap.set(roomId, game)
 
         game.start()
-        game.addPlayer(creator.socketId)
+        game.addPlayer(creator.socketId, creator.nickname)
 
         return roomId
     }
@@ -40,7 +40,7 @@ export class RoomService {
         if (room) {
             room.users.push(user)
             this.userToRoomMap.set(user.socketId, roomId)
-            room.game.addPlayer(user.socketId)
+            room.game.addPlayer(user.socketId, user.nickname)
         }
     }
 
