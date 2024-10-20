@@ -12,10 +12,11 @@ const GamePage = () => {
     useEffect(() => {
         if (socket && roomId) {
             const game = new Game(socket)
-
             game.start()
 
             return () => {
+                game.stop()
+
                 setIsAuthorized(false)
                 socket.emit('leaveRoom', roomId)
             }

@@ -25,6 +25,8 @@ export class Game {
 
     private lastFrameTime: number = 0
 
+    private stopGameLoop: boolean = false
+
     constructor(socket: Socket) {
         this.canvas = document.getElementById('game') as HTMLCanvasElement
         this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D
@@ -35,6 +37,8 @@ export class Game {
     }
 
     public start() {
+        this.stopGameLoop = false
+
         this.canvas.width = WIDTH
         this.canvas.height = HEIGHT
 
@@ -55,10 +59,14 @@ export class Game {
         requestAnimationFrame(this.frame)
     }
 
+    public stop() {
+        this.stopGameLoop = true
+    }
+
     private frame(timestamp: number) {
         const deltaTime = timestamp - this.lastFrameTime
 
-        if (deltaTime >= MS_PER_FRAME) {
+        if (!this.stopGameLoop && deltaTime >= MS_PER_FRAME) {
             this.render()
             this.update()
 
