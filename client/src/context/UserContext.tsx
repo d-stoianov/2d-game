@@ -24,7 +24,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthorized, setIsAuthorized] = useState<boolean>(false)
 
     useEffect(() => {
-        const newSocket = io(import.meta.env.VITE_API_URL)
+        const newSocket = io(import.meta.env.VITE_API_URL, {
+            path: '/sockets/socket.io',
+        })
 
         newSocket.on('connect', () => {
             console.log(`You connected with socket ID: ${newSocket.id}`)

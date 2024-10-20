@@ -18,8 +18,9 @@ server.listen(PORT, () => {
 
 const io = new SocketIOServer(server, {
     cors: {
-        origin: "*",
+        origin: process.env.ORIGIN_URL,
     },
+    path: "/sockets/socket.io",
 })
 
 const roomService = new RoomService()
