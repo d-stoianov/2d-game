@@ -13,12 +13,12 @@ export class Player extends GameObject implements PlayerInterface {
         width: number = 0,
         height: number = 0,
         speed: number = 0,
-        nickanme: string = ""
+        nickname: string = ""
     ) {
         super(x, y, width, height)
         this.id = id
         this.speed = speed
-        this.nickname = nickanme
+        this.nickname = nickname
     }
 
     public update(dt: number, inputArray: string[]) {

@@ -6,6 +6,9 @@ import { Server as SocketIOServer } from "socket.io"
 const FPS: number = 60 // target frames per second
 const MS_PER_FRAME: number = 1000 / FPS // frame duration in milliseconds
 
+const GAME_WIDTH = 1280
+const GAME_HEIGHT = 720
+
 export class Game {
     private io: SocketIOServer
     private roomId: UUID
@@ -70,13 +73,83 @@ export class Game {
     }
 
     private update(dt: number) {
-        // update each player in game state
         this.gameState.players.forEach((p) => {
             const inputArray = this.inputMap.get(p.id)
             if (inputArray) {
                 p.update(dt, inputArray)
+                this.checkWallCollision(p)
             }
         })
+        this.checkPlayerCollisions()
+    }
+
+    private checkWallCollision(player: Player): void {
+        const { x, y, width, height } = player
+
+        if (x < 0) {
+            player.x = 0
+        } else if (x + width > GAME_WIDTH) {
+            player.x = GAME_WIDTH - width
+        }
+
+        if (y < 0) {
+            player.y = 0
+        } else if (y + height > GAME_HEIGHT) {
+            player.y = GAME_HEIGHT - height
+        }
+    }
+
+    private checkPlayerCollisions(): void {
+        const players = this.gameState.players
+
+        for (let i = 0; i < players.length; i++) {
+            for (let j = i + 1; j < players.length; j++) {
+                const p1 = players[i]
+                const p2 = players[j]
+
+                if (this.isColliding(p1, p2)) {
+                    this.resolvePlayerCollision(p1, p2)
+                }
+            }
+        }
+    }
+
+    private isColliding(p1: Player, p2: Player): boolean {
+        return (
+            p1.x < p2.x + p2.width &&
+            p1.x + p1.width > p2.x &&
+            p1.y < p2.y + p2.height &&
+            p1.y + p1.height > p2.y
+        )
+    }
+
+    private resolvePlayerCollision(p1: Player, p2: Player): void {
+        const overlapX = Math.min(
+            p1.x + p1.width - p2.x,
+            p2.x + p2.width - p1.x
+        )
+        const overlapY = Math.min(
+            p1.y + p1.height - p2.y,
+            p2.y + p2.height - p1.y
+        )
+
+        if (overlapX < overlapY) {
+            if (p1.x < p2.x) {
+                p1.x -= overlapX / 2
+                p2.x += overlapX / 2
+            } else {
+                p1.x += overlapX / 2
+                p2.x -= overlapX / 2
+            }
+        } else {
+            if (p1.y < p2.y) {
+                p1.y -= overlapY / 2
+                p2.y += overlapY / 2
+            } else {
+                p1.y += overlapY / 2
+                p2.y -= overlapY / 2
+            }
+        }
     }
 
     private log() {

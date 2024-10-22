@@ -5,8 +5,8 @@ import { Player } from '@/game/Player'
 import { Label } from '@/game/Label'
 import { PlayerInterface } from '~/shared/Player'
 
-const WIDTH = 500
-const HEIGHT = 500
+const WIDTH = 1280
+const HEIGHT = 720
 
 const FPS: number = 60 // target frames per second
 const MS_PER_FRAME: number = 1000 / FPS // frame duration in milliseconds
