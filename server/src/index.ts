@@ -1,7 +1,11 @@
-import { RoomService } from "@/RoomService"
+import { config } from "dotenv"
+config()
+
 import { UUID } from "crypto"
 import { createServer } from "http"
 import { Server as SocketIOServer, Socket } from "socket.io"
+
+import { RoomService } from "@/RoomService"
 import { User } from "@/game/User"
 
 const PORT = 8080
