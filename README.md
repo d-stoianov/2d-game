@@ -1,6 +1,6 @@
 # Multiplayer 2d Game
 
-This project is a multiplayer 2d game built in TypeScript.
+This project is currently in progress..
 
 Check it out [here](https://dstoianov.site)
 
